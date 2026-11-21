@@ -1,15 +1,8 @@
-# © BugHunterCodeLabs ™
-# © bughunter0
-# © Nuhman Pk
-# 2021 - 2024
-# Copyright - https://en.m.wikipedia.org/wiki/Fair_use
-
-# /usr/bin/@vexastryx/bughunter0 
+# © @vexastryx
 
 import os
 from pyrogram import Client, filters
 from dotenv import load_dotenv
-import os
 from pyrogram.types import Message
 from scraper import (
     all_audio_scraping,
@@ -22,109 +15,106 @@ from scraper import (
     extract_local_storage,
     html_data_scraping,
     raw_data_scraping,
-    extract_metadata,
-    capture_screenshot,
-    record_screen
+    extract_metadata
 )
 from crawler import crawl_web
-from utils import OPTIONS, START_BUTTON, START_TEXT
+from utils import BOTTOM_MENU, START_TEXT
 
 load_dotenv()
 
 bot_token = os.getenv("BOT_TOKEN")
 api_id = os.getenv("API_ID")
 api_hash = os.getenv("API_HASH")
-
-CRAWL_LOG_CHANNEL = os.getenv('CRAWL_LOG_CHANNEL')
+CRAWL_LOG_CHANNEL = os.getenv("CRAWL_LOG_CHANNEL")
 
 if bot_token is None or api_id is None or api_hash is None:
-    raise ValueError(
-        "Please set the BOT_TOKEN, API_ID, and API_HASH environment variables."
-    )
+    raise ValueError("Please set the BOT_TOKEN, API_ID, and API_HASH environment variables.")
 
 app = Client(
     "WebScrapperBot", bot_token=bot_token, api_id=int(api_id), api_hash=api_hash
 )
 
+# Har bir foydalanuvchining oxirgi yuborgan linkini saqlash
+user_links = {}
 
-@app.on_message(filters.command(["start"]))
+# scraper.py funksiyalari ishlashi uchun moslashtirilgan obyekt
+class DummyCallback:
+    def __init__(self, message: Message, url: str):
+        self.message = message
+        self.message.text = url
+        self.from_user = message.from_user
+
+
+@app.on_message(filters.command(["start"]) & filters.private)
 async def start(_, message: Message):
-    # Edit Your Start string here
-    text = START_TEXT
-    await message.reply_text(text=text, disable_web_page_preview=True, quote=True)
-
-
-@app.on_callback_query()
-async def cb_data(bot:Client, update):
-    if update.data == "cbrdata":
-        await raw_data_scraping(update)
-    elif update.data == "cbhtmldata":
-        await html_data_scraping(update)
-    elif update.data == "cballlinks":
-        await all_links_scraping(update)
-    elif update.data == "cballparagraphs":
-        await all_paragraph_scraping(update)
-    elif update.data == "cballimages":
-        await all_images_scraping(bot,update)
-    elif update.data == "cballaudio":
-        await all_audio_scraping(bot,update)
-    elif update.data == "cballvideo":
-        await all_video_scraping(bot,update)
-    elif update.data == "cballpdf":
-        await all_pdf_scraping(update)
-    elif update.data == "cbmetadata":
-        await extract_metadata(update)
-    elif update.data == "cbcookies":
-        await extract_cookies(update)
-    elif update.data == "cblocalstorage":
-        await extract_local_storage(update)
-    elif update.data == "cbscreenshot":
-        await capture_screenshot(update)
-    elif update.data == "cbscreenrecord":
-        await record_screen(update)
-    elif update.data == "cdstoptrasmission":
-        bot.stop_transmission()
-    elif update.data == 'cbcrawl':
-        if CRAWL_LOG_CHANNEL:
-            await crawl_web(bot,update)
-        else:
-            await update.message.reply('You must provide a Log Channel ID')
-
-    else:
-        await update.message.edit_text(
-            text=START_TEXT, disable_web_page_preview=True, reply_markup=START_BUTTON
-        )
-
-
-@app.on_message(
-    (filters.regex("https") | filters.regex("http") | filters.regex("www"))
-    & filters.private
-)
-async def scrapping(bot, message):
-    await send_message_with_options(message)
-
-
-async def send_message_with_options(message):
-    reply_markup = OPTIONS
-    await message.reply_text("Choose an Option")
     await message.reply_text(
-        message.text, reply_markup=reply_markup, disable_web_page_preview=True
+        text=START_TEXT,
+        reply_markup=BOTTOM_MENU,
+        disable_web_page_preview=True,
+        quote=True
     )
 
 
-# Use soup.find_all('tag_name') to Extract Specific Tag Details
-"""
-soup.title
-# <title>This is Title</title>
+@app.on_message(
+    (filters.regex("https://") | filters.regex("http://") | filters.regex("www."))
+    & filters.private
+)
+async def save_link(_, message: Message):
+    user_links[message.from_user.id] = message.text.strip()
+    await message.reply_text(
+        "✅ **Havola qabul qilindi!**\nEndi pastki menyudan kerakli bo'limni tanlang:\n\n"
+        "👨‍💻 @vexastryx",
+        reply_markup=BOTTOM_MENU,
+        disable_web_page_preview=True
+    )
 
-soup.title.name
-# u'title'
 
-soup.title.string
-# u'This is a string'
+@app.on_message(filters.text & filters.private)
+async def handle_menu(bot: Client, message: Message):
+    user_id = message.from_user.id
+    text = message.text
 
-soup.title.parent.name
-# u'head'
-"""
+    if user_id not in user_links:
+        await message.reply_text(
+            "⚠️ **Avval sayt havolasini (link) yuboring!**\nMasalan: `https://example.com`",
+            reply_markup=BOTTOM_MENU
+        )
+        return
 
-app.run(print("Bot Running...."))
+    url = user_links[user_id]
+    status_msg = await message.reply_text("⏳ **Ma'lumot yuklanmoqda, kuting...**")
+    dummy_update = DummyCallback(status_msg, url)
+
+    if text == "📄 Full Content":
+        await raw_data_scraping(dummy_update)
+    elif text == "📝 HTML Data":
+        await html_data_scraping(dummy_update)
+    elif text == "🔗 All Links":
+        await all_links_scraping(dummy_update)
+    elif text == "📃 All Paragraphs":
+        await all_paragraph_scraping(dummy_update)
+    elif text == "🌄 All Images":
+        await all_images_scraping(bot, dummy_update)
+    elif text == "🎵 All Audio":
+        await all_audio_scraping(bot, dummy_update)
+    elif text == "🎥 All Video":
+        await all_video_scraping(bot, dummy_update)
+    elif text == "📚 All PDFs":
+        await all_pdf_scraping(dummy_update)
+    elif text == "🍪 Cookies":
+        await extract_cookies(dummy_update)
+    elif text == "📦 LocalStorage":
+        await extract_local_storage(dummy_update)
+    elif text == "📊 Metadata":
+        await extract_metadata(dummy_update)
+    elif text == "🕷️ Crawl Complete Web":
+        if CRAWL_LOG_CHANNEL:
+            await crawl_web(bot, dummy_update)
+        else:
+            await status_msg.edit_text("⚠️ **Web Crawler** ishlashi uchun Render'dagi Environment Variables bo'limiga `CRAWL_LOG_CHANNEL` (kanal ID raqami) qo'shishingiz kerak.")
+    else:
+        await status_msg.edit_text("❓ Pastki menyudagi tugmalardan birini tanlang yoki yangi havola yuboring.")
+
+
+print("Bot Running....")
+app.run()
