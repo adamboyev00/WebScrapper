@@ -11,4 +11,4 @@ RUN pip install --upgrade pip && \
 
 COPY . .
 
-CMD ["python", "main.py"]
+CMD ["sh", "-c", "python -m http.server ${PORT:-10000} & python main.py"]
