@@ -1,73 +1,47 @@
-# /usr/bin/nuhmanpk/bughunter0 
-# @BugHunterBots
+# © @vexastryx
 
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
-
-REPO = 'https://github.com/nuhmanpk/WebScrapper/'
+from pyrogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 FINISHED_PROGRESS_STR = "▓"
 UN_FINISHED_PROGRESS_STR = "░"
 
-START_TEXT = "Hello , I am a web scrapper bot.\nSend me any link for scrapping.\n\n\n Join @BugHunterBots"
+START_TEXT = (
+    "👋 **Assalomu alaykum! Universal Web Scraper Botga xush kelibsiz.**\n\n"
+    "Menga istalgan veb-sayt havolasini (link) yuboring va pastki menyudan "
+    "kerakli ma'lumot turini tanlang.\n\n"
+    "⚡ **Imkoniyatlar:**\n"
+    "• Saytni to'liq o'qish va HTML kodini olish\n"
+    "• Barcha PDF fayllar, rasmlar, audio va videolarni yuklab olish\n"
+    "• Havolalar, matnlar, Metadata, Cookies va Web Crawler\n\n"
+    "👨‍💻 **Yaratuvchi:** @vexastryx"
+)
 
-START_BUTTON = InlineKeyboardMarkup(
+BOTTOM_MENU = ReplyKeyboardMarkup(
     [
         [
-            InlineKeyboardButton('Raw Data', callback_data='cbrdata'),
-            InlineKeyboardButton('HTML Data', callback_data='cbhtmldata')
+            KeyboardButton("📄 Full Content"),
+            KeyboardButton("📝 HTML Data")
         ],
         [
-            InlineKeyboardButton('All Links', callback_data='cballlinks'),
-            InlineKeyboardButton(
-                'All Paragraphs', callback_data='cballparagraphs')
+            KeyboardButton("🔗 All Links"),
+            KeyboardButton("📃 All Paragraphs")
         ],
         [
-            InlineKeyboardButton('All Images', callback_data='cballimages')
+            KeyboardButton("🌄 All Images"),
+            KeyboardButton("📚 All PDFs")
+        ],
+        [
+            KeyboardButton("🎵 All Audio"),
+            KeyboardButton("🎥 All Video")
+        ],
+        [
+            KeyboardButton("🍪 Cookies"),
+            KeyboardButton("📦 LocalStorage")
+        ],
+        [
+            KeyboardButton("📊 Metadata"),
+            KeyboardButton("🕷️ Crawl Complete Web")
         ]
-    ]
-)
-
-BACK_BUTTON = [[InlineKeyboardButton('Back', callback_data='cbclose')]]
-
-CLOSE_BUTTON = InlineKeyboardMarkup(
-    BACK_BUTTON
-)
-
-OPTIONS = InlineKeyboardMarkup(
-    [
-        [
-            InlineKeyboardButton('📄 Full Content', callback_data='cbrdata'),
-            InlineKeyboardButton('📝 HTML Data', callback_data='cbhtmldata')
-        ],
-        [
-            InlineKeyboardButton('🔗 All Links', callback_data='cballlinks'),
-            InlineKeyboardButton('📃 All Paragraphs'
-                                , callback_data='cballparagraphs')
-        ],
-        [
-            InlineKeyboardButton('🌄 All Images', callback_data='cballimages')
-        ],
-        [
-            InlineKeyboardButton('🎵 All Audio', callback_data='cballaudio'),
-            InlineKeyboardButton('🎥 All Video', callback_data='cballvideo')
-        ],
-        [
-            InlineKeyboardButton('📚 All PDFs', callback_data='cballpdf')
-        ],
-        [
-            InlineKeyboardButton('🍪 Cookies', callback_data='cbcookies'),
-            InlineKeyboardButton(
-                '📦 LocalStorage', callback_data='cblocalstorage')
-        ],
-        [
-            InlineKeyboardButton('📊 Metadata', callback_data='cbmetadata')
-        ],
-        # [
-        #     InlineKeyboardButton('📷 Screenshot', callback_data='cbscreenshot'),
-        #     InlineKeyboardButton('🎬 Screen Record', callback_data='cbscreenrecord')
-        # ],
-        [
-            InlineKeyboardButton('🕷️ Crawl Complete Web', callback_data='cbcrawl')
-        ],
-    ]
+    ],
+    resize_keyboard=True
 )
